@@ -9,7 +9,7 @@ const execFileAsync = promisify(execFile);
 async function batchMemoryByPid(pids: number[]): Promise<Map<number, number>> {
   const result = new Map<number, number>();
   if (pids.length === 0) return result;
-  const { stdout } = await execFileAsync("ps", ["-o", "pid=,rss=", "-p", pids.join(",")], {
+  const { stdout } = await execFileAsync("/bin/ps", ["-o", "pid=,rss=", "-p", pids.join(",")], {
     maxBuffer: 1024 * 1024,
   });
   for (const line of stdout.split("\n")) {

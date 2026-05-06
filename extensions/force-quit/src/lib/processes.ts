@@ -7,7 +7,7 @@ import type { RunningProcess } from "../types";
 const execFileAsync = promisify(execFile);
 
 async function listProcesses(): Promise<{ pid: number; name: string; memoryMB: number }[]> {
-  const { stdout } = await execFileAsync("ps", ["-axo", "pid=,rss=,comm="], {
+  const { stdout } = await execFileAsync("/bin/ps", ["-axo", "pid=,rss=,comm="], {
     maxBuffer: 5 * 1024 * 1024,
   });
   const processes: { pid: number; name: string; memoryMB: number }[] = [];

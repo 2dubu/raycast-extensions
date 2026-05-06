@@ -3,5 +3,5 @@ export function kbToMB(rssKB: number): number {
 }
 
 export function formatMemoryMB(memoryMB: number): string {
-  return `${memoryMB.toLocaleString("en-US")} MB`;
+  return `${memoryMB.toLocaleString()} MB`;
 }
