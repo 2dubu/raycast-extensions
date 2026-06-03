@@ -6,21 +6,26 @@ import type { RunningProcess } from "../types";
 
 const execFileAsync = promisify(execFile);
 
-async function listProcesses(): Promise<{ pid: number; name: string; memoryMB: number }[]> {
-  const { stdout } = await execFileAsync("/bin/ps", ["-axo", "pid=,rss=,comm="], {
+type RawProcess = { pid: number; name: string; memoryMB: number; cpuPercent: number };
+
+async function listProcesses(): Promise<RawProcess[]> {
+  const { stdout } = await execFileAsync("/bin/ps", ["-axo", "pid=,rss=,%cpu=,comm="], {
     maxBuffer: 5 * 1024 * 1024,
   });
-  const processes: { pid: number; name: string; memoryMB: number }[] = [];
+  const processes: RawProcess[] = [];
   for (const line of stdout.split("\n")) {
     if (!line.trim()) continue;
-    // Split into at most 3 tokens: pid, rss, comm-with-spaces
-    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.*)$/);
+    // Split into at most 4 tokens: pid, rss, %cpu, comm-with-spaces
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+([\d.]+)\s+(.*)$/);
     if (!match) continue;
     const pid = Number.parseInt(match[1], 10);
     const rssKB = Number.parseInt(match[2], 10);
-    const name = match[3].trim();
+    const cpu = Number.parseFloat(match[3]);
+    // macOS `comm` is the full executable path; show just the basename as the title.
+    const comm = match[4].trim();
+    const name = comm.split("/").pop() || comm;
     if (!Number.isFinite(pid) || !Number.isFinite(rssKB) || rssKB <= 0 || !name) continue;
-    processes.push({ pid, name, memoryMB: kbToMB(rssKB) });
+    processes.push({ pid, name, memoryMB: kbToMB(rssKB), cpuPercent: Number.isFinite(cpu) ? cpu : 0 });
   }
   return processes;
 }
@@ -38,10 +43,8 @@ async function getBundlePathByPid(): Promise<Map<number, string>> {
 
 export async function fetchAllProcesses(): Promise<RunningProcess[]> {
   const [rawProcesses, bundlePaths] = await Promise.all([listProcesses(), getBundlePathByPid()]);
-  return rawProcesses
-    .map((p) => {
-      const bundlePath = bundlePaths.get(p.pid);
-      return bundlePath ? { ...p, bundlePath } : p;
-    })
-    .sort((a, b) => b.memoryMB - a.memoryMB);
+  return rawProcesses.map((p) => {
+    const bundlePath = bundlePaths.get(p.pid);
+    return bundlePath ? { ...p, bundlePath } : p;
+  });
 }

@@ -5,3 +5,7 @@ export function kbToMB(rssKB: number): number {
 export function formatMemoryMB(memoryMB: number): string {
   return `${memoryMB.toLocaleString()} MB`;
 }
+
+export function formatCpu(cpuPercent: number): string {
+  return `${cpuPercent.toFixed(1)}%`;
+}

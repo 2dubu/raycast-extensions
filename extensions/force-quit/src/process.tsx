@@ -1,21 +1,39 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { fetchAllProcesses } from "./lib/processes";
 import { killByPid } from "./lib/kill";
-import { formatMemoryMB } from "./lib/format";
+import { formatCpu, formatMemoryMB } from "./lib/format";
+import { compareBySortKey } from "./lib/sort";
+import type { SortKey } from "./types";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(fetchAllProcesses, [], { initialData: [] });
+  const [sortKey, setSortKey] = useState<SortKey>("memory");
+
+  const sorted = useMemo(() => [...data].sort(compareBySortKey(sortKey)), [data, sortKey]);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search processes...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search processes..."
+      searchBarAccessory={
+        <List.Dropdown tooltip="Sort by" value={sortKey} onChange={(value) => setSortKey(value as SortKey)}>
+          <List.Dropdown.Item title="Memory" value="memory" />
+          <List.Dropdown.Item title="CPU" value="cpu" />
+        </List.Dropdown>
+      }
+    >
       <List.EmptyView title="No processes found" />
-      {data.map((proc) => (
+      {sorted.map((proc) => (
         <List.Item
           key={proc.pid}
           icon={proc.bundlePath ? { fileIcon: proc.bundlePath } : Icon.Terminal}
           title={proc.name}
-          accessories={[{ tag: formatMemoryMB(proc.memoryMB) }]}
+          accessories={[
+            { text: formatCpu(proc.cpuPercent), tooltip: "CPU" },
+            { text: formatMemoryMB(proc.memoryMB), tooltip: "Memory" },
+          ]}
           actions={
             <ActionPanel>
               <Action
