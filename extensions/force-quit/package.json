@@ -26,6 +26,18 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Auto-Refresh",
+      "label": "Refresh interval (ms)",
+      "description": "How often to refresh the list, in milliseconds. Use 0 to disable. Minimum 1000.",
+      "type": "textfield",
+      "required": false,
+      "default": "2000",
+      "placeholder": "2000"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.85.0",
     "@raycast/utils": "^1.18.0"

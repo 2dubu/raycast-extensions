@@ -5,11 +5,13 @@ import { fetchAllProcesses } from "./lib/processes";
 import { killByPid } from "./lib/kill";
 import { formatCpu, formatMemoryMB } from "./lib/format";
 import { compareBySortKey } from "./lib/sort";
+import { useAutoRefresh } from "./lib/useAutoRefresh";
 import type { SortKey } from "./types";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(fetchAllProcesses, [], { initialData: [] });
   const [sortKey, setSortKey] = useState<SortKey>("memory");
+  useAutoRefresh(revalidate);
 
   const sorted = useMemo(() => [...data].sort(compareBySortKey(sortKey)), [data, sortKey]);
 
