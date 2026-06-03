@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { fetchRunningApps } from "./lib/apps";
@@ -31,8 +31,16 @@ export default function Command() {
           icon={app.bundlePath ? { fileIcon: app.bundlePath } : Icon.AppWindow}
           title={app.name}
           accessories={[
-            { text: formatCpu(app.cpuPercent), tooltip: "CPU" },
-            { text: formatMemoryMB(app.memoryMB), tooltip: "Memory" },
+            {
+              icon: { source: Icon.Gauge, tintColor: Color.PrimaryText },
+              text: formatCpu(app.cpuPercent),
+              tooltip: "CPU",
+            },
+            {
+              icon: { source: Icon.MemoryChip, tintColor: Color.PrimaryText },
+              text: formatMemoryMB(app.memoryMB),
+              tooltip: "Memory",
+            },
           ]}
           actions={
             <ActionPanel>

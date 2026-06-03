@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { fetchAllProcesses } from "./lib/processes";
@@ -31,8 +31,16 @@ export default function Command() {
           icon={proc.bundlePath ? { fileIcon: proc.bundlePath } : Icon.Terminal}
           title={proc.name}
           accessories={[
-            { text: formatCpu(proc.cpuPercent), tooltip: "CPU" },
-            { text: formatMemoryMB(proc.memoryMB), tooltip: "Memory" },
+            {
+              icon: { source: Icon.Gauge, tintColor: Color.PrimaryText },
+              text: formatCpu(proc.cpuPercent),
+              tooltip: "CPU",
+            },
+            {
+              icon: { source: Icon.MemoryChip, tintColor: Color.PrimaryText },
+              text: formatMemoryMB(proc.memoryMB),
+              tooltip: "Memory",
+            },
           ]}
           actions={
             <ActionPanel>
